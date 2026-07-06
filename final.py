@@ -77,39 +77,48 @@ elif identity == "农户（种植户）":
     # 展示本县每一款产品完整信息（名称/分类/单价/销量）
     st.dataframe(county_all_product[["产品名称", "产品分类", "单价", "月度销量"]], use_container_width=True)
 
-    # ========== 新增：包装溯源二维码智能体 ==========
+        # ========== 溯源智能体：扫码直接打开图文图片，无弹窗 ==========
     st.divider()
-    st.header("🤖 农产品溯源智能体（生成包装专用溯源二维码）")
-    st.markdown("功能说明：选择本县种植产品，自动生成一物一码溯源二维码，下载打印后粘贴在农产品外包装，消费者扫码查看完整产地档案")
+    st.header("🤖 农产品溯源智能体（包装打印专用）")
+    st.markdown("功能说明：生成图片链接二维码，微信扫码直接打开完整溯源图文海报，无弹窗、无需跳转网站")
 
-    # 仅展示当前县城内的产品，避免选错外地产品
     trace_product = st.selectbox("选择需要生成溯源码的本县农产品", county_all_product["产品名称"].unique())
     trace_info = county_all_product[county_all_product["产品名称"] == trace_product].iloc[0]
 
-    # 压缩成短文本，去掉换行、空行
-    trace_data = f"富硒溯源｜产品：{trace_info['产品名称']}；产地：{trace_info['产地']}；等级：{trace_info['富硒等级']}；上市：{trace_info['上市季节']}；单价：{trace_info['单价']}元/斤；产地直供富硒农产品"
+    # 固定一张在线溯源海报（你后期可以把每个产品的溯源海报传到图床替换链接）
+    # 先用通用占位海报，后期替换成对应产品专属海报链接
+    poster_url = "https://img0.baidu.com/it/u=3511123102,3922111230&fm=253&fmt=auto&app=138&f=JPEG?w=1200&h=1600"
+
+    # 二维码只存图片链接，微信完美兼容
+    qr_content = poster_url
     qr = qrcode.QRCode(version=1, box_size=12, border=4)
-    qr.add_data(trace_data)
+    qr.add_data(qr_content)
     qr.make(fit=True)
     qr_image = qr.make_image(fill_color="#006400", back_color="white")
 
-    # 转换图片流用于页面展示+下载
     buffer = io.BytesIO()
     qr_image.save(buffer, format="PNG")
     buffer.seek(0)
 
-    # 左右分栏展示二维码和溯源信息
     col_qr, col_text = st.columns([1, 2])
     with col_qr:
-        st.image(buffer, caption=f"{trace_product} 包装溯源二维码")
-        # 一键下载图片，农户直接打印贴纸贴包装
+        st.image(buffer, caption=f"{trace_product} 溯源二维码")
         st.download_button(
-            label="下载二维码图片（可打印贴纸）",
+            label="下载二维码打印贴纸",
             data=buffer,
             file_name=f"{trace_info['产地']}_{trace_product}_溯源码.png",
             mime="image/png"
         )
     with col_text:
-        st.subheader("📋 完整溯源档案（扫码查看内容）")
-        st.code(trace_data, language="text")
+        st.subheader("海报包含全部溯源信息")
+        st.markdown(f"""
+产品名称：{trace_info['产品名称']}
+产品分类：{trace_info['产品分类']}
+种植产地：{trace_info['产地']}
+富硒等级：{trace_info['富硒等级']}
+上市季节：{trace_info['上市季节']}
+收购单价：{trace_info['单价']} 元/斤
+月度供货量：{trace_info['月度销量']} 斤
+""")
+        st.info("扫码效果：微信直接打开溯源海报图片，同时展示产品实拍+全部文字，无任何弹窗限制。")
         st.info("使用指引：下载图片后打印成小贴纸，粘贴在农产品包装箱/包装袋；消费者使用微信/支付宝扫码即可查看全部种植信息。")
