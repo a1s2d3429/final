@@ -86,21 +86,9 @@ elif identity == "农户（种植户）":
     trace_product = st.selectbox("选择需要生成溯源码的本县农产品", county_all_product["产品名称"].unique())
     trace_info = county_all_product[county_all_product["产品名称"] == trace_product].iloc[0]
 
-    # 扫码后展示的完整溯源档案
-    trace_data = f"""
-【赣南富硒农产品溯源身份证】
-产品名称：{trace_info['产品名称']}
-产品品类：{trace_info['产品分类']}
-种植产地：{trace_info['产地']}
-富硒品质等级：{trace_info['富硒等级']}
-适宜上市季节：{trace_info['上市季节']}
-产地收购单价：{trace_info['单价']} 元/斤
-本地月度供货规模：{trace_info['月度销量']} 斤
-溯源说明：本产品产自天然富硒土壤产区，无中间商产地直供，全程可追溯。
-    """
-
-    # 生成高清可打印二维码
-    qr = qrcode.QRCode(version=2, box_size=10, border=3)
+    # 压缩成短文本，去掉换行、空行
+    trace_data = f"富硒溯源｜产品：{trace_info['产品名称']}；产地：{trace_info['产地']}；等级：{trace_info['富硒等级']}；上市：{trace_info['上市季节']}；单价：{trace_info['单价']}元/斤；产地直供富硒农产品"
+    qr = qrcode.QRCode(version=1, box_size=12, border=4)
     qr.add_data(trace_data)
     qr.make(fit=True)
     qr_image = qr.make_image(fill_color="#006400", back_color="white")
