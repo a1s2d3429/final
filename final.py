@@ -77,21 +77,23 @@ elif identity == "农户（种植户）":
     # 展示本县每一款产品完整信息（名称/分类/单价/销量）
     st.dataframe(county_all_product[["产品名称", "产品分类", "单价", "月度销量"]], use_container_width=True)
 
-            # ========== 农产品溯源智能体（微信兼容最简文本版，无加载空白） ==========
+                # ========== 溯源智能体：生成扫码直达图文链接二维码 ==========
     st.divider()
-    st.header("🤖 农产品溯源智能体（包装打印专用）")
-    st.markdown("功能说明：生成精简溯源二维码，扫码一键复制全部产品档案，无需跳转网页、无图片加载失败问题")
+    st.header("🤖 农产品溯源智能体（包装专用）")
+    st.markdown("功能说明：生成溯源链接二维码，微信扫码直接打开产品图文档案，无需复制文字，零操作门槛")
 
     # 仅展示当前县城产品
     trace_product = st.selectbox("选择需要生成溯源码的本县农产品", county_all_product["产品名称"].unique())
     trace_info = county_all_product[county_all_product["产品名称"] == trace_product].iloc[0]
 
-    # 极致压缩单行文本，无换行、无多余符号，最大程度避免扫码解析崩溃
-    trace_data = f"赣南富硒溯源｜品名:{trace_info['产品名称']};品类:{trace_info['产品分类']};产地:{trace_info['产地']};富硒等级:{trace_info['富硒等级']};上市季:{trace_info['上市季节']};单价:{trace_info['单价']}元/斤;月供货:{trace_info['月度销量']}斤;产地直供无中间商"
+    # 填入你部署完成后的Streamlit网站域名（替换成你自己的地址）
+    base_site = "https://你的仓库名.streamlit.app"
+    # 拼接溯源专属链接，携带产品、产地参数
+    qr_link = f"{base_site}?prod={trace_info['产品名称']}&county={trace_info['产地']}"
 
-    # 低容量、大尺寸二维码，打印清晰识别稳定
-    qr = qrcode.QRCode(version=1, box_size=14, border=5)
-    qr.add_data(trace_data)
+    # 适配打印高清二维码
+    qr = qrcode.QRCode(version=1, box_size=12, border=4)
+    qr.add_data(qr_link)
     qr.make(fit=True)
     qr_image = qr.make_image(fill_color="#006400", back_color="white")
 
@@ -103,16 +105,12 @@ elif identity == "农户（种植户）":
     with col_qr:
         st.image(buffer, caption=f"{trace_product} 溯源二维码")
         st.download_button(
-            label="下载二维码打印贴纸",
+            label="下载二维码贴纸（可直接打印贴包装）",
             data=buffer,
             file_name=f"{trace_info['产地']}_{trace_product}_溯源码.png",
             mime="image/png"
         )
     with col_text:
-        st.subheader("消费者扫码操作步骤（无加载失败）")
-        st.markdown("""
-        1. 打开微信右上角「+」→ 扫一扫贴纸（不要长按相册识别）
-        2. 页面底部点击【复制文本内容】
-        3. 粘贴到微信对话框/备忘录，完整查看全部溯源信息
-        """)
-        st.warning("打印要求：贴纸边长≥3厘米，光线充足下扫码，不会出现加载空白、图片失效问题")
+        st.subheader("消费者使用体验（无任何复杂操作）")
+        st.markdown("1. 微信直接扫描包装贴纸；\n2. 自动打开溯源页面，同步展示产品实拍图+全部产地信息；\n3. 无需复制文字、无需跳转第三方网站，全程一键查看。")
+        st.warning("请先完成平台部署，将代码中 base_site 替换为你的真实网页地址后再下载二维码！")
