@@ -110,5 +110,4 @@ elif identity == "农户（种植户）":
             file_name=f"{trace_info['产地']}_{trace_product}_溯源码.png",
             mime="image/png"
         )
-    with col_text:
-        
+    
