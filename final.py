@@ -80,14 +80,14 @@ elif identity == "农户（种植户）":
                 # ========== 溯源智能体：生成扫码直达图文链接二维码 ==========
     st.divider()
     st.header("🤖 农产品溯源智能体（包装专用）")
-    st.markdown("功能说明：生成溯源链接二维码，微信扫码直接打开产品图文档案，无需复制文字，零操作门槛")
+    
 
     # 仅展示当前县城产品
     trace_product = st.selectbox("选择需要生成溯源码的本县农产品", county_all_product["产品名称"].unique())
     trace_info = county_all_product[county_all_product["产品名称"] == trace_product].iloc[0]
 
     # 填入你部署完成后的Streamlit网站域名（替换成你自己的地址）
-    base_site = "https://你的仓库名.streamlit.app"
+    base_site = "https://vyxgwejjjsxmdk8wgtrkrd.streamlit.app/"
     # 拼接溯源专属链接，携带产品、产地参数
     qr_link = f"{base_site}?prod={trace_info['产品名称']}&county={trace_info['产地']}"
 
@@ -111,6 +111,4 @@ elif identity == "农户（种植户）":
             mime="image/png"
         )
     with col_text:
-        st.subheader("消费者使用体验（无任何复杂操作）")
-        st.markdown("1. 微信直接扫描包装贴纸；\n2. 自动打开溯源页面，同步展示产品实拍图+全部产地信息；\n3. 无需复制文字、无需跳转第三方网站，全程一键查看。")
-        st.warning("请先完成平台部署，将代码中 base_site 替换为你的真实网页地址后再下载二维码！")
+        
